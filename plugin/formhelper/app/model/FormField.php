@@ -33,5 +33,10 @@ class FormField extends Model
     public function form() {
         return $this->belongsTo(Form::class, 'form_id');
     } 
+
+    // 正向关联到 FormFieldValue 模型
+    public function field_values() {
+        return $this->hasMany(FormFieldValue::class, 'form_field_id');
+    }
      
 }

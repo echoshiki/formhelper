@@ -33,6 +33,7 @@ final class FormHelperMigration extends AbstractMigration
             ->addColumn('field_type', 'enum', ['values' => ['text', 'textarea', 'select', 'checkbox', 'radio', 'file', 'date', 'number'], 'comment' => '字段类型'])
             ->addColumn('options', 'text', ['null' => true, 'comment' => '字段选项'])
             ->addColumn('required', 'boolean', ['default' => false, 'comment' => '是否必填'])
+            ->addColumn('sort', 'integer', ['signed' => false, 'default' => 0, 'comment' => '排序'])
             ->addTimestamps()
             ->create();
 

@@ -25,10 +25,15 @@ class FormFieldValue extends Model
      */
     protected $primaryKey = 'id';
 
+    // 反向关联到 Submission 模型
     public function submission() {
         return $this->belongsTo(FormSubmission::class, 'form_submission_id');
     }
-    
-    
-    
+
+    // 反向关联到 FormField 模型
+    public function field() {
+        return $this->belongsTo(FormField::class, 'form_field_id');
+    }
+
+     
 }

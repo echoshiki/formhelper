@@ -42,7 +42,7 @@ class FormFieldValuesSeeder extends AbstractSeed
                         $value = $faker->randomElement(json_decode($field['options']));
                         break;
                     case 'checkbox':
-                        $value = json_encode($faker->randomElements(json_decode($field['options']), 2));
+                        $value = json_encode($faker->randomElements(json_decode($field['options']), 2), JSON_UNESCAPED_UNICODE);
                         break;
                     case 'date':
                         $value = $faker->date();
