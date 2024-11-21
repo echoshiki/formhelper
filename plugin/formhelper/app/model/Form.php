@@ -28,12 +28,48 @@ class Form extends Model
      */
     protected $primaryKey = 'id';
 
+    /**
+     * 允许批量赋值的字段列表
+     */ 
+    protected $fillable = [
+        'title',
+        'user_id',
+        'description',
+        'started_at',
+        'expired_at',
+        'limited',
+        'single',
+        'logged',
+        'disabled'
+    ];
+
     public function submissions() {
         return $this->hasMany(FormSubmission::class, 'form_id');
     }
 
     public function fields() {
         return $this->hasMany(FormField::class, 'form_id');
+    }
+
+    public function createWithFields($formBase, $formFields) {
+        DB::beginTransaction();
+        try {
+            $form = $this->create($formBase);
+            $form->fields()->createMany(array_map(function ($field) {
+                return [
+                    'label' => $field['label'],
+                    'field_type' => $field['field_type'],
+                    'options' => json_encode($field['options']),
+                    'required' => $field['required'] ?? false,
+                    'sort' => $field['sort'],
+                ];
+            }, $formFields));
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw new \Exception('添加失败: ' . $e->getMessage());
+        }
     }
 
     /**

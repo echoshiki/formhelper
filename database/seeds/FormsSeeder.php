@@ -23,14 +23,20 @@ class FormsSeeder extends AbstractSeed
             $userid = $faker->randomElement($users)['id'];
             $username = $this->fetchRow('SELECT username FROM wa_users WHERE id = '. $userid);
             $username = $username['username'];
-            $expired_at = $faker->dateTimeBetween('-1 week', '+1 year')->format('Y-m-d H:i:s');
+            $started_at = $faker->dateTimeBetween('-2 year', 'now')->format('Y-m-d H:i:s');
+            $expired_at = $faker->dateTimeBetween('-1 week', '+2 year')->format('Y-m-d H:i:s');
             $created_at = $faker->dateTimeBetween('-2 year', 'now')->format('Y-m-d H:i:s');
             $forms[] = [
                 'user_id' => $userid,
                 'title' => $username.'在'.$created_at.'创建的表单',
                 'description' => $faker->sentence,
+                'started_at' => $started_at,
                 'expired_at' => $expired_at,
                 'created_at' => $created_at,
+                'limited' => $faker->numberBetween($min = 0, $max = 1000),
+                'single' => rand(0, 1),
+                'disabled' => rand(0, 1),
+                'logged' => 0,
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
         }

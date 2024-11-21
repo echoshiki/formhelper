@@ -29,6 +29,17 @@ class FormField extends Model
      */
     protected $primaryKey = 'id';
 
+    /**
+     * 允许批量赋值的字段列表
+     */ 
+    protected $fillable = [
+        'label',
+        'field_type',
+        'options',
+        'required',
+        'sort',
+    ];
+
     // 反向关联到 Form 模型
     public function form() {
         return $this->belongsTo(Form::class, 'form_id');

@@ -24,7 +24,7 @@ class FormFieldsSeeder extends AbstractSeed
                 $form_fields[] = [
                     'form_id' => $form['id'],
                     'label' =>$faker->randomElement(['字段01', '字段02', '字段03', '字段04', '字段05', '字段06', '字段07', '字段08', '字段09', '字段10']),
-                    'field_type' => $faker->randomElement(['text', 'textarea', 'select', 'checkbox', 'radio', 'date', 'number']),
+                    'field_type' => $faker->randomElement(['text', 'textarea', 'number', 'checkbox', 'switch', 'date']),
                     'options' => json_encode($faker->randomElements(['苹果', '梨', '西瓜', '水蜜桃', '火龙果', '柠檬', '橙子', '樱桃'], 3)),
                     'required' => rand(0, 1),
                     'sort' => rand(0, 9),
