@@ -50,7 +50,9 @@ final class FormHelperMigration extends AbstractMigration
 
         $this->table('formhelper_form_field_values')
             ->addColumn('form_submission_id', 'integer', ['signed' => false, 'comment' => '表单提交ID'])
-            ->addColumn('form_field_id', 'integer', ['signed' => false, 'comment' => '表单字段ID'])
+            ->addColumn('label', 'string', ['limit' => 255, 'comment' => '字段标签'])
+            ->addColumn('field_type', 'enum', ['values' => ['text', 'textarea', 'select', 'checkbox', 'switch', 'file', 'date', 'number'], 'comment' => '字段类型'])
+            ->addColumn('sort', 'integer', ['signed' => false, 'default' => 0, 'comment' => '排序'])
             ->addColumn('value', 'text', ['comment' => '字段值'])
             ->create();
     }

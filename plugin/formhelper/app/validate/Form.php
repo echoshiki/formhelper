@@ -7,6 +7,7 @@ class Form extends Validate
 {
     protected $rule = [
         // 表单基本信息验证
+        'id' => 'integer|>=:0',
         'title' => 'require|chsAlphaNum|max:50',
         'description' => 'max:300',
         'started_at' => 'date',

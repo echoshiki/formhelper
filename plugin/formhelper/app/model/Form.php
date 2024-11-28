@@ -72,6 +72,34 @@ class Form extends Model
         }
     }
 
+    public function updateWithFields($formBase, $formFields) {
+        DB::beginTransaction();
+        try {
+            $form = $this->find($formBase['id']);
+            if (!$form) {
+                throw new \Exception('表单不存在');
+            }
+            $form->update($formBase);
+
+            // 字段先清空后创建
+            $form->fields()->delete();
+            $form->fields()->createMany(array_map(function ($field) {
+                return [
+                    'label' => $field['label'],
+                    'field_type' => $field['field_type'],
+                    'options' => json_encode($field['options']),
+                    'required' => $field['required'] ?? false,
+                    'sort' => $field['sort'],
+                ];
+            }, $formFields));
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw new \Exception('更新失败: ' . $e->getMessage());
+        }
+    }
+
     /**
      * 级联删除
      * 一对多关联了 form_submissions & form_fields

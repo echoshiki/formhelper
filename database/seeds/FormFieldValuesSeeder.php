@@ -54,7 +54,9 @@ class FormFieldValuesSeeder extends AbstractSeed
 
                 $form_field_values[] = [
                     'form_submission_id' => $form_submission['id'],
-                    'form_field_id' => $field['id'],
+                    'label' => $field['label'],
+                    'field_type' => $field['field_type'],
+                    'sort' => $field['sort'],
                     'value' => $value,
                 ];
 

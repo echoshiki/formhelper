@@ -133,15 +133,17 @@ class SubmissionController {
 			'msg' => '没有找到有效的参数'
 		], 500); 
 
+		// 修改后不关联 fields 表获取字段信息
 		$response = FormSubmission::with([
 			'user',
 			'form',
-			'field_values.field'
+			'field_values'
 		])->where('id', $id)->first();
 
-		// 查询出结果之后进行排序
+		// 对查询出的结果进行排序
 		$response->field_values = $response->field_values->sortBy(function ($field_value) {
-		    return $field_value->field->sort;
+		    // 根据 $field_value 内的 sort 值进行排序
+		    return $field_value->sort;
 		})->values();
 
 		if (!$response || session('user.id') !== $response->form->user_id) return json([
@@ -149,19 +151,8 @@ class SubmissionController {
 			'msg' => '未找到该数据或者没有权限查看'
 		], 500);
 
-		foreach ($response->field_values as $key => $value) {
-			$fields[$key]['id'] = $value['id'];
-			// 字段名
-			$fields[$key]['label'] = $value['field']['label'];
-			// 字段值
-			$fields[$key]['value'] = $value['value'];
-			// 字段类型
-			$fields[$key]['type'] = $value['field']['field_type'];
-		}
-
-		// 拼接字段数据
 		$data = [
-			'fields' => $fields,
+			'fields' => $response->field_values,
 			'username' => optional($response->user)->username ? $response->user->username : '匿名',
 			'submitted_at' => $response->submitted_at,
 		];
