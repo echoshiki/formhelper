@@ -1,10 +1,19 @@
-## 自定义表单平台
-- 一个 React + Vite + Shadcn 项目的后端部分
-- 由 Webman 作为后端系统
+# 自定义表单平台
+
+[后端仓库](https://github.com/echoshiki/formhelper) ｜ [前端仓库](https://github.com/echoshiki/formhelper_front)
+
+## 介绍
+
+- 一个自定义表单平台的项目
+- 前端 React + Vite + TailwindCSS + Shadcn
+- 后端 Webman + DNMP
 - 可以创建多种自定义字段的表单
 - 分享用户填报
-- 个人中心管理面板
+- 个人用户管理面板
 - 充值并购买创建额度
+- 适配移动端
+
+## 更新日志
 
 **[2024-08-30]**
 1. 首页大致布局框架
@@ -33,4 +42,3 @@
 2. 完成表单修改页面
 3. 抽象了一些组件
 4. 表单分享链接以及二维码
-
