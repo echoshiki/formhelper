@@ -3,7 +3,7 @@ namespace plugin\formhelper\app\validate;
 
 use think\Validate;
 
-class Form extends Validate
+class Forms extends Validate
 {
     protected $rule = [
         // 表单基本信息验证

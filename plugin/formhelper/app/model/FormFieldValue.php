@@ -25,6 +25,22 @@ class FormFieldValue extends Model
      */
     protected $primaryKey = 'id';
 
+    /**
+     * 允许批量赋值的字段列表
+     */ 
+    protected $fillable = [
+        'label',
+        'field_type',
+        'sort',
+        'value',
+        'form_submission_id',
+    ];
+
+    /**
+     * 禁用模型时间戳
+     */ 
+    public $timestamps = false;
+
     // 反向关联到 Submission 模型
     public function submission() {
         return $this->belongsTo(FormSubmission::class, 'form_submission_id');

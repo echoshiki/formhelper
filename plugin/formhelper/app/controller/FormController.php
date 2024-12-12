@@ -7,7 +7,7 @@ use plugin\formhelper\app\model\Form;
 use plugin\formhelper\app\model\FormSubmission;
 use plugin\formhelper\app\model\FormField;
 use plugin\formhelper\app\model\FormFieldValue;
-use plugin\formhelper\app\validate\Form as FormValidate;
+use plugin\formhelper\app\validate\Forms as FormsValidate;
 use plugin\formhelper\app\validate\FormFields as FormFieldsValidate;
 
 use think\facade\Validate;
@@ -85,8 +85,7 @@ class FormController {
 		$view = Form::with([
 			'fields',
 		])->where([
-			'id' => $id,
-			'user_id' => session('user.id')
+			'id' => $id
 		])->first();
 
 		if (!$view) return json([
@@ -112,8 +111,18 @@ class FormController {
     			'disabled' => $view->disabled,
 		];
 
+		// 限填一次的检测
+		if ($data['base']['logged'] && $data['base']['single']) {
+			$user_id = session('user.id');
+			$data['base']['count'] = FormSubmission::where([
+				'form_id' => $data['base']['id'],
+				'user_id' => $user_id
+			])->count();
+		}
+
 	    $data['fields'] = $view->fields->map(function ($field) {
 	        return [
+	        	'id' => $field->id,
 	            'label' => $field->label, // 仅保留需要的字段
 	            'field_type' => $field->field_type,   
 	            'options' => json_decode($field->options),
@@ -140,11 +149,11 @@ class FormController {
 		$formFields = $request->post('formFields');
 
 		// 验证表单基础字段
-		$formValidator = new FormValidate;
-		if (!$formValidator->check($formBase)) {
+		$formsValidator = new FormsValidate;
+		if (!$formsValidator->check($formBase)) {
 			return json([
 				'code' => 550,
-				'msg' => $formValidator->getError()
+				'msg' => $formsValidator->getError()
 			], 200);
 		}
 
@@ -203,11 +212,11 @@ class FormController {
 		], 500); 
 
 		// 验证表单基础字段
-		$formValidator = new FormValidate;
-		if (!$formValidator->check($formBase)) {
+		$formsValidator = new FormsValidate;
+		if (!$formsValidator->check($formBase)) {
 			return json([
 				'code' => 550,
-				'msg' => $formValidator->getError()
+				'msg' => $formsValidator->getError()
 			], 200);
 		}
 
@@ -247,7 +256,7 @@ class FormController {
 			], 500);
 		}
 	}
-	
+
 	/**
      * 删除表单
      * @param Request $request

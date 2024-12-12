@@ -7,6 +7,8 @@ use plugin\formhelper\app\model\Form;
 use plugin\formhelper\app\model\FormSubmission;
 use plugin\formhelper\app\model\FormField;
 use plugin\formhelper\app\model\FormFieldValue;
+use plugin\formhelper\app\validate\FormFieldValues as FormFieldValuesValidate;
+
 
 class SubmissionController {
 	/**
@@ -162,6 +164,81 @@ class SubmissionController {
 			'msg' => 'ok',
 			'data' => $data
 		], 200);
+	}
+
+	public function create(Request $request) {
+		$form_id = $request->post('form_id');
+		$fields = $request->post('fields');
+
+		if (!$form_id) return json([
+			'code' => 500,
+			'msg' => '参数错误，非法提交'
+		], 500);
+
+		// 限填一次的检测
+		$formInfo = Form::find($form_id);
+		if ($formInfo['logged'] && $formInfo['single']) {
+			$user_id = session('user.id');
+			if (!$user_id) return json([
+				'code' => 401,
+				'msg' => '缺少用户id，非法提交'
+			], 500);
+
+			$submitted_count = FormSubmission::where([
+				'form_id' => $formInfo['id'],
+				'user_id' => $user_id
+			])->count();
+
+			if ($submitted_count) return json([
+				'code' => 500,
+				'msg' => '该表单限制提交一次。'
+			], 500); 
+		}
+
+		// 验证表单字段值
+		if (!empty($fields)) {
+			$formFieldValuesValidator = new FormFieldValuesValidate;
+			foreach ($fields as $field) {
+				if (!$formFieldValuesValidator->check($field)) {
+					return json([
+						'code' => 550,
+						'msg' => $formFieldValuesValidator->getError()
+					], 200);
+				}
+			}
+			if (isset($field['value']) && ($field['field_type'] === 'text' || $field['field_type'] == 'textarea')) {
+                $field['value'] = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
+            }
+		} else {
+			return json([
+				'code' => 550,
+				'msg' => '至少添加一个自定义填写项。'
+			], 200);
+		}
+
+		// 需要插入 form_submissions & form_field_values 表
+		$insertData = [
+			'formSubmission' => [
+				'form_id' => $form_id,
+				'user_id' => session('user.id'),
+				'submitted_at' => date('Y-m-d H:i:s'),
+			],
+			'formFieldValues' => $fields
+		];
+
+		try {
+			$submission = new FormSubmission();
+			$result = $submission->createWithFieldValues($insertData);
+			return json([
+				'code' => 0,
+				'msg' => '数据提交成功'
+			], 200);
+		} catch (\Exception $e) {
+			return json([
+				'code' => 500,
+				'msg' => $e->getMessage()
+			], 500);
+		}
 	}
 }
 

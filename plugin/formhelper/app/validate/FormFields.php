@@ -7,7 +7,7 @@ class FormFields extends Validate
 {
     protected $rule = [
         // // 表单字段信息验证
-        'label' => 'require|chsAlphaNum|max:50',
+        'label' => 'require|max:50',
         'field_type' => 'require|in:text,select,switch,textarea,checkbox,file,number,date',
         'options' => 'array|checkOption',
         'required' => 'boolean',

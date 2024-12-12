@@ -26,6 +26,20 @@ class FormSubmission extends Model
      */
     protected $primaryKey = 'id';
 
+    /**
+     * 允许批量赋值的字段列表
+     */ 
+    protected $fillable = [
+        'form_id',
+        'user_id',
+        'submitted_at'
+    ];
+
+    /**
+     * 禁用模型时间戳
+     */ 
+    public $timestamps = false;
+
     // 反向关联到 Form 模型
     public function user() {
         return $this->belongsTo(\plugin\user\app\model\User::class, 'user_id');
@@ -39,6 +53,26 @@ class FormSubmission extends Model
     // 正向关联到 FormFieldValue 模型
     public function field_values() {
         return $this->hasMany(FormFieldValue::class, 'form_submission_id');
+    }
+
+    public function createWithFieldValues($insertData) {
+        DB::beginTransaction();
+        try {
+            $submission = $this->create($insertData['formSubmission']);
+            $submission->field_values()->createMany(array_map(function ($fieldValue) {
+                return [
+                    'label' => $fieldValue['label'],
+                    'field_type' => $fieldValue['field_type'],
+                    'sort' => $fieldValue['sort'],
+                    'value' => json_encode($fieldValue['value'], JSON_UNESCAPED_UNICODE),
+                ];
+            }, $insertData['formFieldValues']));
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw new \Exception('提交失败: ' . $e->getMessage());
+        }
     }
 
     /**
