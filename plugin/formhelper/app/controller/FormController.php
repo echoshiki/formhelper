@@ -111,12 +111,19 @@ class FormController {
     			'disabled' => $view->disabled,
 		];
 
-		// 限填一次的检测
+		// 检测用户限填一次
 		if ($data['base']['logged'] && $data['base']['single']) {
 			$user_id = session('user.id');
 			$data['base']['count'] = FormSubmission::where([
 				'form_id' => $data['base']['id'],
 				'user_id' => $user_id
+			])->count();
+		}
+
+		// 检测填写人数
+		if ($data['base']['limited']) {
+			$data['base']['total_count'] = FormSubmission::where([
+				'form_id' => $data['base']['id']
 			])->count();
 		}
 

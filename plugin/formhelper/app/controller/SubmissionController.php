@@ -175,8 +175,21 @@ class SubmissionController {
 			'msg' => '参数错误，非法提交'
 		], 500);
 
-		// 限填一次的检测
 		$formInfo = Form::find($form_id);
+
+		// 检测是否被禁止
+		if ($formInfo['disabled']) return json([
+			'code' => 500,
+			'msg' => '该表单已经被禁止。'
+		], 500); 
+
+		// 检测是否到期
+		if (strtotime($formInfo['expired_at']) < time()) return json([
+			'code' => 500,
+			'msg' => '该表单已经过期了。'
+		], 500); 
+
+		// 检测用户限填一次
 		if ($formInfo['logged'] && $formInfo['single']) {
 			$user_id = session('user.id');
 			if (!$user_id) return json([
@@ -192,6 +205,19 @@ class SubmissionController {
 			if ($submitted_count) return json([
 				'code' => 500,
 				'msg' => '该表单限制提交一次。'
+			], 500); 
+		}
+
+		// 检测填写人数
+		if ($formInfo['limited']) {
+			$submitted_total_count = FormSubmission::where([
+				'form_id' => $formInfo['id']
+			])->count();
+
+			// 如果填写次数大于限制次数
+			if ($submitted_total_count >= $formInfo['limited']) return json([
+				'code' => 500,
+				'msg' => '已经超出该表单设定的最大填写数。'
 			], 500); 
 		}
 
