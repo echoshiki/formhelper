@@ -19,6 +19,36 @@ class FormsSeeder extends AbstractSeed
         $forms = [];
         $users = $this->fetchAll('SELECT id, username FROM wa_users WHERE id < 5');
 
+        // 标题组合元素
+        $topPart = [
+            '钢铁厂',
+            '外贸公司',
+            '五金市场',
+            '猎头公司',
+            '食品厂',
+            '金融机构',
+            '学校',
+            '食堂',
+            '餐饮连锁',
+            '销售集团',
+        ];
+
+        $middlePart = [
+            '圣诞节活动',
+            '户外团建',
+            '联欢晚会',
+            '观看电影',
+            '年货采购'
+        ];
+
+        $bottomPart = [
+            '问卷调查',
+            '报名表',
+            '摸底排查',
+            '意见收集',
+            '匿名调查'
+        ];
+
         for ($i = 0; $i < 30; $i++) {
             $userid = $faker->randomElement($users)['id'];
             $username = $this->fetchRow('SELECT username FROM wa_users WHERE id = '. $userid);
@@ -28,7 +58,7 @@ class FormsSeeder extends AbstractSeed
             $created_at = $faker->dateTimeBetween('-2 year', 'now')->format('Y-m-d H:i:s');
             $forms[] = [
                 'user_id' => $userid,
-                'title' => $username.'在'.$created_at.'创建的表单',
+                'title' => '某'.$faker->randomElement($topPart).'关于'.$faker->randomElement($middlePart).'的'.$faker->randomElement($bottomPart),
                 'description' => $faker->sentence,
                 'started_at' => $started_at,
                 'expired_at' => $expired_at,

@@ -5,13 +5,14 @@ namespace plugin\formhelper\app\controller;
 use support\Request;
 use plugin\formhelper\app\model\Form;
 use plugin\formhelper\app\model\FormSubmission;
-use plugin\formhelper\app\model\FormField;
-use plugin\formhelper\app\model\FormFieldValue;
+// use plugin\formhelper\app\model\FormField;
+// use plugin\formhelper\app\model\FormFieldValue;
 use plugin\formhelper\app\validate\Forms as FormsValidate;
 use plugin\formhelper\app\validate\FormFields as FormFieldsValidate;
 
-use think\facade\Validate;
+use Carbon\Carbon;
 
+// use think\facade\Validate;
 
 class FormController {
 	/**
@@ -25,6 +26,7 @@ class FormController {
 		$sortField = $request->get('sort_field', 'id');
 		$sortOrder = $request->get('sort_order', 'desc');
 		$search = $request->get('search', null);
+		$fields = explode(',', $request->get('fields', '*'));
 		$user_id = session('user.id');
 
 		try {
@@ -41,6 +43,10 @@ class FormController {
 		                  ->orWhere('description', 'like', "%$search%");
 	            });
 			}
+
+			// 筛选指定字段
+			$query->select($fields);
+
 			// 排序
 			$query->orderBy($sortField, $sortOrder);
 			// 分页
@@ -167,6 +173,8 @@ class FormController {
 		$formBase['started_at'] = $formBase['started_at'] ? $formBase['started_at'] : date('Y-m-d H:i:s');
 		$formBase['expired_at'] = $formBase['expired_at'] ? $formBase['expired_at'] : null;
 
+		$formBase['limited'] = $formBase['limited'] ? $formBase['limited'] : 0;
+
 		// 验证表单自定义字段
 		if (!empty($formFields)) {
 			$formFieldsValidator = new FormFieldsValidate;
@@ -229,6 +237,8 @@ class FormController {
 
 		$formBase['started_at'] = $formBase['started_at'] ? $formBase['started_at'] : date('Y-m-d H:i:s');
 		$formBase['expired_at'] = $formBase['expired_at'] ? $formBase['expired_at'] : null;
+
+		$formBase['limited'] = $formBase['limited'] ? $formBase['limited'] : 0;
 
 		// 验证表单自定义字段
 		if (!empty($formFields)) {
@@ -295,6 +305,38 @@ class FormController {
 				'code' => 0,
 				'msg' => '表单删除成功'
 			], 200);
+		} catch (\Exception $e) {
+			return json([
+				'code' => 500,
+				'msg' => $e->getMessage()
+			], 500);
+		}
+	}
+
+	public function getDataCount(Request $request) {
+		$data = [];
+		$user_id = session('user.id');
+		try {
+			$formData = Form::where('user_id', $user_id)->withCount([
+				'submissions',
+				'submissions as week_submissions' => function ($query) {
+					$query->whereBetween('submitted_at', [
+						Carbon::now()->startOfWeek(),
+						Carbon::now()->endOfWeek()
+					]);
+				}
+			])->get();
+
+			$data['allForms'] = $formData->count();
+			$data['allSubmissions'] = $formData->sum('submissions_count');
+			$data['weekSubmissions'] = $formData->sum('week_submissions');
+
+			return json([
+				'code' => 0,
+				'msg' => 'ok',
+				'data' => $data
+			]);
+
 		} catch (\Exception $e) {
 			return json([
 				'code' => 500,

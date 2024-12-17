@@ -35,7 +35,8 @@
     "tinywan/jwt": "^1.10",
     "webman-tech/laravel-validation": "^1.2",
     "webman-tech/laravel-translation": "^1.1",
-    "topthink/think-validate": "^2.0"
+    "topthink/think-validate": "^2.0",
+    "nesbot/carbon": "^2"
   },
   "suggest": {
     "ext-event": "For better performance. "

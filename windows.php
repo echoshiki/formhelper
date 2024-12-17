@@ -5,9 +5,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Dotenv\Dotenv;
-use process\Monitor;
 use support\App;
-use Workerman\Worker;
 
 ini_set('display_errors', 'on');
 error_reporting(E_ALL);
@@ -31,9 +29,10 @@ $runtimeProcessPath = runtime_path() . DIRECTORY_SEPARATOR . '/windows';
 if (!is_dir($runtimeProcessPath)) {
     mkdir($runtimeProcessPath);
 }
-$processFiles = [
-    __DIR__ . DIRECTORY_SEPARATOR . 'start.php'
-];
+$processFiles = [];
+if (config('server.listen')) {
+    $processFiles[] = __DIR__ . DIRECTORY_SEPARATOR . 'start.php';
+}
 foreach (config('process', []) as $processName => $config) {
     $processFiles[] = write_process_file($runtimeProcessPath, $processName, '');
 }
@@ -90,7 +89,8 @@ EOF;
 }
 
 if ($monitorConfig = config('process.monitor.constructor')) {
-    $monitor = new Monitor(...array_values($monitorConfig));
+    $monitorHandler = config('process.monitor.handler');
+    $monitor = new $monitorHandler(...array_values($monitorConfig));
 }
 
 function popen_processes($processFiles)

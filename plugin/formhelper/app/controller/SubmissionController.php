@@ -11,6 +11,7 @@ use plugin\formhelper\app\validate\FormFieldValues as FormFieldValuesValidate;
 
 
 class SubmissionController {
+
 	/**
      * 查询指定表单的所有提交数据
      * @param Request $request
@@ -28,7 +29,6 @@ class SubmissionController {
 			'code' => 500,
 			'msg' => '没有找到有效的参数'
 		], 500); 
-
 
 		$user_id = session('user.id');
 		$forms = Form::where('id', $form_id)->where('user_id', $user_id)->get();
@@ -184,7 +184,7 @@ class SubmissionController {
 		], 500); 
 
 		// 检测是否到期
-		if (strtotime($formInfo['expired_at']) < time()) return json([
+		if ($formInfo['expired_at'] && strtotime($formInfo['expired_at']) < time()) return json([
 			'code' => 500,
 			'msg' => '该表单已经过期了。'
 		], 500); 
@@ -265,6 +265,44 @@ class SubmissionController {
 				'msg' => $e->getMessage()
 			], 500);
 		}
+	}
+
+	/**
+     * 快速查询最新提交数据
+     * @param Request $request
+     * @return \support\Response
+     */
+	public function simple_list(Request $request) {
+		$user_id = session('user.id');
+		try {
+			// 获取该用户所有表单id
+			$form_ids = Form::where('user_id', $user_id)->pluck('id');
+			// 查询这些表单下所有的填报数据
+			$submissions = FormSubmission::whereIn('form_id', $form_ids)
+				->with([ 'user:id,username' ])
+				->limit(5)
+				->orderBy('submitted_at', 'desc')
+				->get()
+				->map(function ($submission) {
+					return [
+						'id' => $submission->id,
+						'username' => $submission->user->username,
+						'submitted_at' => $submission->submitted_at,
+						'form_id' => $submission->form_id
+					];
+			});
+
+			return json([
+				'code' => 0,
+				'msg' => 'ok',
+				'data' =>  $submissions
+			]);
+		} catch (\Exception $e) {
+			return json([
+				'code' => 500,
+				'msg' => $e->getMessage()
+			], 500);
+		} 
 	}
 }
 
