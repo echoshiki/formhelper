@@ -6,3 +6,7 @@ use Webman\Route;
 // Route::disableDefaultRoute();
 // use plugin\formhelper\app\controller\IndexController;
 // Route::any('/formhelper', [IndexController::class, 'index']);
+
+// Route::get('/fonts/{file}', function ($file) {
+//     return response()->file('plugin/formhelper/public/fonts/'.$file);
+// });
