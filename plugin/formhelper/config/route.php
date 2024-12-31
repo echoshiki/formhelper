@@ -2,11 +2,13 @@
 
 use Webman\Route;
 
-// // 关闭默认路由才会生效
-// Route::disableDefaultRoute();
-// use plugin\formhelper\app\controller\IndexController;
-// Route::any('/formhelper', [IndexController::class, 'index']);
-
-// Route::get('/fonts/{file}', function ($file) {
-//     return response()->file('plugin/formhelper/public/fonts/'.$file);
-// });
+Route::any('/formhelper[{path:.+}]', function ($path = '') {
+    $pluginPublicPath = base_path('plugin/formhelper/public');
+    // 检查是否存在静态资源文件
+    $filePath = "$pluginPublicPath/$path";
+    if (is_file($filePath)) {
+        return response()->file($filePath);
+    }
+    // 对于 SPA 路由，返回 index.html
+    return response()->file("$pluginPublicPath/index.html");
+});
