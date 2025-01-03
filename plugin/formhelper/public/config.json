@@ -1,0 +1,4 @@
+{
+    "VITE_APP_PREFIX": "/formhelper",
+    "VITE_API_URL": "http://webman.lc/app"
+}
